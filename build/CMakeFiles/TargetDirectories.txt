@@ -1,0 +1,3 @@
+C:/Users/Cookie/Documents/GitHub/Framework-OpenGL-Raytracer/build/CMakeFiles/main.dir
+C:/Users/Cookie/Documents/GitHub/Framework-OpenGL-Raytracer/build/CMakeFiles/ALL_BUILD.dir
+C:/Users/Cookie/Documents/GitHub/Framework-OpenGL-Raytracer/build/CMakeFiles/ZERO_CHECK.dir

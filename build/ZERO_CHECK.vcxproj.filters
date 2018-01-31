@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\Cookie\Documents\GitHub\Framework-OpenGL-Raytracer\build\CMakeFiles\c80e9372f081027d36d7a6025dd5e60a\generate.stamp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{17A6A30A-A90C-3647-85E3-C92857385350}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
