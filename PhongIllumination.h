@@ -5,6 +5,7 @@
 #include "TriangleMesh.h"
 #include "Light.h"
 #include "SceneObject.h"
+#include "helpers.h"
 
 class PhongIllumination {
 
@@ -15,15 +16,17 @@ public:
 	~PhongIllumination();
 
 	// performes the phong illumination calculation
-	Vec3f IlluminationCalculation(SceneObject& sceneObject, vector <light>& lightSources, Vec3f hitPoint, Vec3f N, Vec3f V);
+	Vec3f IlluminationCalculation(SceneObject& sceneObject, vector <light>& lightSources,
+		Vec3f hitPoint, Vec3f N, Vec3f V, vector <unsigned int> S,
+		Vec3f RecursiveRayIntensity, float Reflection, bool recursive);
+
+	Vec3f IlluminationCalculation_correct_Phong(SceneObject& sceneObject, vector <light>& lightSources, Vec3f hitPoint, Vec3f N, Vec3f V);
 
 private:
 	// mirror coefficient 
 	unsigned int Ke = 64;
 
-	// calculates the standard norm of a 3d vector
-	float eukl(Vec3f vec);
-
+	helpers helper;
 };
 
 #endif

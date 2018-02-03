@@ -84,7 +84,18 @@ int main(int argc, char** argv) {
 	numOfLights = lights.size();
 	//=======================//
 
+	/*
+	****** choose skybox to load ******
 
+	0 is skybox_space_blue
+	1 is skybox1
+	2 is skybox2
+	3 is skybox3
+	*/
+
+	skybox.loadSkyBox(skybox.skyboxSelection, filename, image);
+
+	delete image;
 	// activate main loop
 	coutHelp();
 	glutTimerFunc(10, processTimedEvent, clock());
@@ -111,6 +122,9 @@ void initialize() {
 	// enable light with defaults
 	glEnable(GL_LIGHT0);
 	glEnable(GL_LIGHT1);
+
+	// sky box texture IDs (6 IDs, initialized with 0)
+	skybox.skyboxTextureIDs.resize(6, 0);
 }
 
 void setDefaults() {
@@ -234,12 +248,25 @@ void drawLight() {
 
 void renderScene() {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	glDisable(GL_LIGHTING);
+	glDisable(GL_DEPTH_TEST);
+	skybox.drawSkybox(cameraDir);
+	glEnable(GL_DEPTH_TEST);
+
 	// render ray trace result on a quad in front of the camera
 	if (raytracedTextureID) {
+
 		// save matrix and load identities => no transformation, no projection
 		glMatrixMode(GL_PROJECTION);
 		glPushMatrix();
 		glLoadIdentity();
+
+		glDisable(GL_LIGHTING);
+		glDisable(GL_DEPTH_TEST);
+		skybox.drawSkybox(cameraDir);
+		glEnable(GL_DEPTH_TEST);
+
 		glMatrixMode(GL_MODELVIEW);
 		glPushMatrix();
 		glLoadIdentity();
@@ -270,7 +297,7 @@ void renderScene() {
 		gluLookAt(cameraPos.x, cameraPos.y, cameraPos.z,    // Position
 			cameraLookAt.x, cameraLookAt.y, cameraLookAt.z, // Lookat
 			0.0, 1.0, 0.0);           // Up-direction  
-  // draw coordinate system without lighting
+		// draw coordinate system without lighting
 		glDisable(GL_LIGHTING);
 		drawCS();
 		// draw sphere for light still without lighting
@@ -291,6 +318,85 @@ void renderScene() {
 	}
 	// swap Buffers
 	glutSwapBuffers();
+}
+
+vector <unsigned int> shadowRay(Vec3f hitPoint, unsigned int hitTri) {
+	vector <unsigned int> S;
+
+	// we iterate over all light sources to see which of them are shining on our hit point
+	for (unsigned int i = 0; i < lights.size(); i++) {
+		// large t, that is further than anything we could hit
+		float t = 1000.0f;
+
+		// calculate the direction and distance to the light source
+		Vec3f V = lights[i].lightPos - hitPoint;
+		float distanceToLight = helper.eukl(V);
+		V.normalize();
+
+		// small epsilon > 0 which shall help avoiding numerical problems
+		float epsilon = pow(-8, 10);
+
+		// we move our hit point a little so we won't hit it again
+		Vec3f hitPointE = hitPoint + epsilon * V;
+
+		// make a shadow ray pointing in direction of the light source
+		Ray <float> shadowRay(&hitPointE[0], &V[0]);
+
+		// to the hit test 
+		float u, v, t_min, u_min, v_min;
+		int prevHitTri = hitTri;
+		int hitMesh = intersectRayObjectsEarliest(shadowRay, t, u, v, hitTri, prevHitTri, t_min, u_min, v_min);
+
+		// check whether the closest thing we hit is the light source or something else
+		if (t_min >= distanceToLight - epsilon) S.push_back(1);
+		else S.push_back(0);
+
+		// check whether there were no numerical problems resulting in hitting the same triangle
+		if (hitTri == prevHitTri && hitMesh != -1) {
+			cout << "something went wrong, we hit the same triangle! Namely: " << hitTri << endl;
+		}
+	}
+	return S;
+}
+
+Vec3f calculateColor(Ray <float> ray, float u_min, float v_min, float t_min, unsigned int hitTri, int hitMesh) {
+	// calculate where the triangle has been hit by the ray
+	Vec3f hitPoint = ray.o + ray.d * t_min;
+
+	// send out shadow feeler ray
+	vector <unsigned int> S = shadowRay(hitPoint, hitTri);
+
+	// get the triangle's vertex normals
+	Vec3f vec1, vec2, vertexNormal0, vertexNormal1, vertexNormal2, interpolatedNormal;
+	unsigned int id0, id1, id2;
+	TriangleMesh m = meshes[hitMesh];
+	Vec3ui tri = m.triangles[hitTri];
+	id0 = tri[0];
+	id1 = tri[1];
+	id2 = tri[2];
+	vertexNormal0 = m.normals[id0];
+	vertexNormal1 = m.normals[id1];
+	vertexNormal2 = m.normals[id2];
+
+	// use characteristic of barycentric coordinates (u + v + w = 1) to get w
+	float w_min = 1 - u_min - v_min;
+	// interpolate the normal 
+	interpolatedNormal = w_min * vertexNormal0 + u_min * vertexNormal1 + v_min * vertexNormal2;
+
+	// calculate vector pointing from the hit point to the camera (eye)
+	Vec3f V = cameraDir - hitPoint;
+	V.normalize();
+
+	Vec3f recursiveRayIntensity = { 0.5f, 0.5f, 0.5f };
+
+	// reflection parameter in [0,1]
+	float reflection = 0.4f;
+	reflection = max(min(reflection, 1.0f), 0.0f);
+
+	bool recursive = true;
+
+	// do the phong illumination algorith
+	return phong.IlluminationCalculation(objects[hitMesh], lights, hitPoint, interpolatedNormal, V, S, recursiveRayIntensity, reflection, recursive);
 }
 
 void raytrace() {
@@ -324,42 +430,15 @@ void raytrace() {
 			float eyeF[3]; eyeF[0] = (float)eye[0];  eyeF[1] = (float)eye[1];  eyeF[2] = (float)eye[2];
 			Ray<float> ray(&eyeF[0], &endF[0]);
 			float t = 1000.0f;              // ray parameter hit point, initialized with max view length
-			float u, v;                      // barycentric coordinates (w = 1-u-v)
+			float u, v;                     // barycentric coordinates (w = 1-u-v)
 			// intersection test
 			int hitMesh;
+			int prev = -1;
 			unsigned int hitTri;
 			float t_min, u_min, v_min;
-			if ((hitMesh = intersectRayObjectsEarliest(ray, t, u, v, hitTri, t_min, u_min, v_min)) != -1) {
+			if ((hitMesh = intersectRayObjectsEarliest(ray, t, u, v, hitTri, prev, t_min, u_min, v_min)) != -1) {
 				// TODO: calculate color
-
-				// calculate where the triangle has been hit by the ray
-				Vec3f hitPoint = ray.o + ray.d * t_min;
-
-				// get the triangle's vertex normals
-				Vec3f vec1, vec2, vertexNormal0, vertexNormal1, vertexNormal2, interpolatedNormal;
-				unsigned int id0, id1, id2;
-				TriangleMesh m = meshes[hitMesh];
-				Vec3ui tri = m.triangles[hitTri];
-				id0 = tri[0];
-				id1 = tri[1];
-				id2 = tri[2];
-				vertexNormal0 = m.normals[id0];
-				vertexNormal1 = m.normals[id1];
-				vertexNormal2 = m.normals[id2];
-
-				// use characteristic of barycentric coordinates (u + v + w = 1) to get w
-				float w_min = 1 - u_min - v_min;
-				// interpolate the normal 
-				interpolatedNormal = w_min * vertexNormal0 + u_min * vertexNormal1 + v_min * vertexNormal2;
-
-				// calculate vector pointing from the hit point to the camera (eye)
-				Vec3f V = cameraDir - hitPoint;
-				V.normalize();
-
-				// do the phong illumination algorithm
-				Vec3f rgb = phong.IlluminationCalculation(objects[hitMesh], lights, hitPoint, interpolatedNormal, V);
-
-				pictureRGB[pixel] = rgb;
+				pictureRGB[pixel] = calculateColor(ray, u_min, v_min, t_min, hitTri, hitMesh);
 				hits++;
 			}
 			// cout "." every 1/50 of all pixels
@@ -398,7 +477,7 @@ void raytrace() {
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, VP[2], VP[3], 0, GL_RGBA, GL_UNSIGNED_BYTE, &picture[0]);
 }
 
-int intersectRayObjectsEarliest(const Ray<float> &ray, float &t, float &u, float &v, unsigned int &hitTri, float &t_min, float &u_min, float &v_min) {
+int intersectRayObjectsEarliest(const Ray<float> &ray, float &t, float &u, float &v, unsigned int &hitTri, int &prevHitTri, float &t_min, float &u_min, float &v_min) {
 	//======== added ========//
 	t_min = t;
 	int currentNearestMesh = -1;
@@ -418,7 +497,7 @@ int intersectRayObjectsEarliest(const Ray<float> &ray, float &t, float &u, float
 			Vec3f& p2 = vertices[triangles[j][2]];
 			int hit = ray.triangleIntersect(&p0.x, &p1.x, &p2.x, u, v, t);
 			intersectionTests++;
-			if (hit == 1 && t > 0.0f) {
+			if (hit == 1 && t > 0.0f && j != prevHitTri) {
 				//return i;
 
 				//======== added ========//

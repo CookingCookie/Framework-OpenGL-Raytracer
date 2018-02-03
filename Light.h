@@ -3,7 +3,7 @@
 
 #include "TriangleMesh.h"
 
-static Vec3f environmentalLightIntensity = { 0.1f, 0.1f, 0.1f };
+static Vec3f environmentalLightIntensity = { 0.5f, 0.5f, 0.5f };
 
 struct light {
 	Vec3f lightPos;

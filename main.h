@@ -20,6 +20,7 @@
 #include "PhongIllumination.h"
 #include "Light.h"
 #include "SceneObject.h"
+#include "Skybox.h"
 
 using namespace std;
 
@@ -27,12 +28,31 @@ using namespace std;
 // === GLOBAL DATA ===
 // ===================
 
+//=========================================================//
+
+//------------- changable values -------------------// 
+
+// lights
 light light0, light1;
+// vector containing all lights
 vector <light> lights;
+// for switching the light movement
 unsigned int l;
+// the total number of lights
 unsigned int numOfLights;
 
+//=========================================================//
+
+
 PhongIllumination phong;
+
+helpers helper;
+
+vector <unsigned int> shadowRay(Vec3f hitPoint, unsigned int hitTri);
+
+Vec3f calculateColor(Ray <float> ray, float u_min, float v_min, float t_min, unsigned int hitTri, int hitMesh);
+
+Skybox skybox;
 
 // camera Information
 Vec3f cameraPos;
@@ -78,7 +98,7 @@ void renderScene(void);
 
 void raytrace();
 
-int intersectRayObjectsEarliest(const Ray<float> &ray, float &t, float &u, float &v, unsigned int &hitTri, float &t_min, float &u_min, float &v_min);
+int intersectRayObjectsEarliest(const Ray<float> &ray, float &t, float &u, float &v, unsigned int &hitTri, int &prevHitTri, float &t_min, float &u_min, float &v_min);
 
 bool rayAABBIntersect(const Ray<float> &r, const Vec3f& vmin, const Vec3f& vmax, float t0, float t1);
 

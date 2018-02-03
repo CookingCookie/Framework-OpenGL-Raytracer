@@ -15,12 +15,18 @@ SET(HEADER_FILES
   "PhongIllumination.h"
   "Light.h"
   "SceneObject.h"
+  "Skybox.h"
+  "RecursiveRayTracer.h"
+  "helpers.h"
 )
 SET(SOURCE_FILES  
   "main.cpp"
   "TriangleMesh.cpp"
   "imageloader.cpp"
   "PhongIllumination.cpp"
+  "Skybox.cpp"
+  "RecursiveRayTracer.cpp"
+  "helpers.cpp"
 )
 SOURCE_GROUP(Header FILES ${HEADER_FILES})
 SOURCE_GROUP(Source FILES ${SOURCE_FILES})
