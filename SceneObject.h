@@ -6,6 +6,8 @@ struct SceneObject {
 	float matDiffuse[4];
 	float matSpecular[4];
 	float matShininess;
+	float reflectivity;
+	float opacity;
 	GLuint textureID;
 };
 

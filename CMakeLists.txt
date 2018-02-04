@@ -18,6 +18,7 @@ SET(HEADER_FILES
   "Skybox.h"
   "RecursiveRayTracer.h"
   "helpers.h"
+  "Intersection.h"
 )
 SET(SOURCE_FILES  
   "main.cpp"
@@ -27,6 +28,7 @@ SET(SOURCE_FILES
   "Skybox.cpp"
   "RecursiveRayTracer.cpp"
   "helpers.cpp"
+  "Intersection.cpp"
 )
 SOURCE_GROUP(Header FILES ${HEADER_FILES})
 SOURCE_GROUP(Source FILES ${SOURCE_FILES})

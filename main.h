@@ -16,11 +16,12 @@
 
 #include "Vec3.h"         // basic vector arithmetic class (embedded in std::)
 #include "TriangleMesh.h" // simple class for reading and rendering triangle meshes
-#include "Ray.h"          // class for ray intersection with triangles
 #include "PhongIllumination.h"
 #include "Light.h"
 #include "SceneObject.h"
 #include "Skybox.h"
+#include <numeric>
+#include "RecursiveRayTracer.h"
 
 using namespace std;
 
@@ -48,9 +49,9 @@ PhongIllumination phong;
 
 helpers helper;
 
-vector <unsigned int> shadowRay(Vec3f hitPoint, unsigned int hitTri);
+Intersection intersection;
 
-Vec3f calculateColor(Ray <float> ray, float u_min, float v_min, float t_min, unsigned int hitTri, int hitMesh);
+RecursiveRayTracer rrt;
 
 Skybox skybox;
 
@@ -97,10 +98,6 @@ void drawLight();
 void renderScene(void);
 
 void raytrace();
-
-int intersectRayObjectsEarliest(const Ray<float> &ray, float &t, float &u, float &v, unsigned int &hitTri, int &prevHitTri, float &t_min, float &u_min, float &v_min);
-
-bool rayAABBIntersect(const Ray<float> &r, const Vec3f& vmin, const Vec3f& vmax, float t0, float t1);
 
 // =================
 // === CALLBACKS ===

@@ -30,9 +30,16 @@ Vec3f PhongIllumination::IlluminationCalculation_correct_Phong(SceneObject& scen
 	return I_ambient + DS_sumOverLights;
 }
 
+Vec3f PhongIllumination::CalcAmbientTerm(SceneObject& sceneObject) {
+	Vec3f I_ambient;
+	for (unsigned int i = 0; i < 3; i++) {
+		I_ambient[i] = environmentalLightIntensity[i] * sceneObject.matAmbient[i];
+	}
+	return I_ambient;
+}
+
 Vec3f PhongIllumination::IlluminationCalculation(SceneObject& sceneObject, vector <light>& lightSources,
-	Vec3f hitPoint, Vec3f N, Vec3f V, vector <unsigned int> S,
-	Vec3f RecursiveRayIntensity, float Reflection, bool recursive) {
+	Vec3f hitPoint, Vec3f N, Vec3f V, vector <unsigned int> S) {
 	unsigned int lss = lightSources.size();
 	Vec3f I_ambient, DS_sumOverLights, L, LV, H;
 	// iterate over r,g,b
@@ -50,8 +57,6 @@ Vec3f PhongIllumination::IlluminationCalculation(SceneObject& sceneObject, vecto
 			// else S[l] is 1
 			DS_sumOverLights[i] += S[l] * lightSources[l].lightIntensity * (KdFd + KsFs);
 		}
-		// added for recursive ray tracing
-		if (recursive) DS_sumOverLights[i] += Reflection * RecursiveRayIntensity[i];
 	}
-	return I_ambient + DS_sumOverLights;
+	return 	I_ambient + DS_sumOverLights;
 }

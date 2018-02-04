@@ -57,6 +57,10 @@ int main(int argc, char** argv) {
 	filename = "Models/delphin.off";
 	tm2.loadOFF(filename.c_str(), Vec3f(0.6f, 0.0f, 0.3f), 7.0f);
 	meshes.push_back(tm2);
+	TriangleMesh tm3;
+	filename = "Models/Sketched-Teddy-org.off";
+	tm3.loadOFF(filename.c_str(), Vec3f(6.6f, 0.0f, 0.9f), 7.0f);
+	meshes.push_back(tm3);
 	for (unsigned int i = 0; i < meshes.size(); i++) meshes[i].coutData();
 	// load textures
 	Image* image;
@@ -65,18 +69,39 @@ int main(int argc, char** argv) {
 	textureIDs.push_back(loadTexture(image));
 	// add object attributes (material, texture, ...)
 	SceneObject so;
+	//============ added ===============//
+	so.reflectivity = 0.0f;
+	so.opacity = 0.0f;
+	//==================================//
 	so.matAmbient[0] = 0.2f; so.matAmbient[1] = 0.1f; so.matAmbient[2] = 0.1f; so.matAmbient[3] = 1.0f;
 	so.matDiffuse[0] = 0.6f; so.matDiffuse[1] = 0.3f; so.matDiffuse[2] = 0.3f; so.matDiffuse[3] = 1.0f;
 	so.matSpecular[0] = 0.4f; so.matSpecular[1] = 0.4f; so.matSpecular[2] = 0.4f; so.matSpecular[3] = 1.0f;
 	so.matShininess = 0.8f * 128.0f;
 	so.textureID = textureIDs[0];
 	objects.push_back(so);
+
+	//============ added ===============//
+	so.reflectivity = 0.0f;
+	so.opacity = 0.2f;
+	//==================================//
 	so.matAmbient[0] = 0.1f; so.matAmbient[1] = 0.2f; so.matAmbient[2] = 0.1f; so.matAmbient[3] = 1.0f;
 	so.matDiffuse[0] = 0.3f; so.matDiffuse[1] = 0.6f; so.matDiffuse[2] = 0.3f; so.matDiffuse[3] = 1.0f;
 	so.matSpecular[0] = 0.4f; so.matSpecular[1] = 0.4f; so.matSpecular[2] = 0.4f; so.matSpecular[3] = 1.0f;
 	so.matShininess = 0.8f * 128.0f;
 	so.textureID = textureIDs[0];
 	objects.push_back(so);
+
+
+	//============ added ===============//
+	so.reflectivity = 1.0f;
+	so.opacity = 0.0f;
+	so.matAmbient[0] = 0.3f; so.matAmbient[1] = 0.3f; so.matAmbient[2] = 0.3f; so.matAmbient[3] = 1.0f;
+	so.matDiffuse[0] = 0.3f; so.matDiffuse[1] = 0.3f; so.matDiffuse[2] = 0.3f; so.matDiffuse[3] = 1.0f;
+	so.matSpecular[0] = 0.8f; so.matSpecular[1] = 0.8f; so.matSpecular[2] = 0.8f; so.matSpecular[3] = 1.0f;
+	so.matShininess = 0.9f * 128.0f;
+	so.textureID = textureIDs[0];
+	objects.push_back(so);
+	//==================================//
 
 	//======== added ========//
 	lights.push_back(light0);
@@ -320,85 +345,6 @@ void renderScene() {
 	glutSwapBuffers();
 }
 
-vector <unsigned int> shadowRay(Vec3f hitPoint, unsigned int hitTri) {
-	vector <unsigned int> S;
-
-	// we iterate over all light sources to see which of them are shining on our hit point
-	for (unsigned int i = 0; i < lights.size(); i++) {
-		// large t, that is further than anything we could hit
-		float t = 1000.0f;
-
-		// calculate the direction and distance to the light source
-		Vec3f V = lights[i].lightPos - hitPoint;
-		float distanceToLight = helper.eukl(V);
-		V.normalize();
-
-		// small epsilon > 0 which shall help avoiding numerical problems
-		float epsilon = pow(-8, 10);
-
-		// we move our hit point a little so we won't hit it again
-		Vec3f hitPointE = hitPoint + epsilon * V;
-
-		// make a shadow ray pointing in direction of the light source
-		Ray <float> shadowRay(&hitPointE[0], &V[0]);
-
-		// to the hit test 
-		float u, v, t_min, u_min, v_min;
-		int prevHitTri = hitTri;
-		int hitMesh = intersectRayObjectsEarliest(shadowRay, t, u, v, hitTri, prevHitTri, t_min, u_min, v_min);
-
-		// check whether the closest thing we hit is the light source or something else
-		if (t_min >= distanceToLight - epsilon) S.push_back(1);
-		else S.push_back(0);
-
-		// check whether there were no numerical problems resulting in hitting the same triangle
-		if (hitTri == prevHitTri && hitMesh != -1) {
-			cout << "something went wrong, we hit the same triangle! Namely: " << hitTri << endl;
-		}
-	}
-	return S;
-}
-
-Vec3f calculateColor(Ray <float> ray, float u_min, float v_min, float t_min, unsigned int hitTri, int hitMesh) {
-	// calculate where the triangle has been hit by the ray
-	Vec3f hitPoint = ray.o + ray.d * t_min;
-
-	// send out shadow feeler ray
-	vector <unsigned int> S = shadowRay(hitPoint, hitTri);
-
-	// get the triangle's vertex normals
-	Vec3f vec1, vec2, vertexNormal0, vertexNormal1, vertexNormal2, interpolatedNormal;
-	unsigned int id0, id1, id2;
-	TriangleMesh m = meshes[hitMesh];
-	Vec3ui tri = m.triangles[hitTri];
-	id0 = tri[0];
-	id1 = tri[1];
-	id2 = tri[2];
-	vertexNormal0 = m.normals[id0];
-	vertexNormal1 = m.normals[id1];
-	vertexNormal2 = m.normals[id2];
-
-	// use characteristic of barycentric coordinates (u + v + w = 1) to get w
-	float w_min = 1 - u_min - v_min;
-	// interpolate the normal 
-	interpolatedNormal = w_min * vertexNormal0 + u_min * vertexNormal1 + v_min * vertexNormal2;
-
-	// calculate vector pointing from the hit point to the camera (eye)
-	Vec3f V = cameraDir - hitPoint;
-	V.normalize();
-
-	Vec3f recursiveRayIntensity = { 0.5f, 0.5f, 0.5f };
-
-	// reflection parameter in [0,1]
-	float reflection = 0.4f;
-	reflection = max(min(reflection, 1.0f), 0.0f);
-
-	bool recursive = true;
-
-	// do the phong illumination algorith
-	return phong.IlluminationCalculation(objects[hitMesh], lights, hitPoint, interpolatedNormal, V, S, recursiveRayIntensity, reflection, recursive);
-}
-
 void raytrace() {
 	// initialization
 	GLdouble MV[16];
@@ -435,10 +381,15 @@ void raytrace() {
 			int hitMesh;
 			int prev = -1;
 			unsigned int hitTri;
+			unsigned int d_max = 6;
+			unsigned int d = 0;
 			float t_min, u_min, v_min;
-			if ((hitMesh = intersectRayObjectsEarliest(ray, t, u, v, hitTri, prev, t_min, u_min, v_min)) != -1) {
+			float reflectiveRayIntensity = 0.1f;
+			float refractiveRayIntensity = 0.2f;
+			Vec3f color = Vec3f();
+			if ((hitMesh = intersection.intersectRayObjectsEarliest(ray, t, u, v, hitTri, prev, t_min, u_min, v_min, meshes, intersectionTests)) != -1) {
 				// TODO: calculate color
-				pictureRGB[pixel] = calculateColor(ray, u_min, v_min, t_min, hitTri, hitMesh);
+				pictureRGB[pixel] = rrt.calculateColor(color, ray, u_min, v_min, t_min, hitTri, hitMesh, d_max, d, reflectiveRayIntensity, refractiveRayIntensity, meshes, intersectionTests, lights, cameraDir, objects);
 				hits++;
 			}
 			// cout "." every 1/50 of all pixels
@@ -475,92 +426,6 @@ void raytrace() {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, VP[2], VP[3], 0, GL_RGBA, GL_UNSIGNED_BYTE, &picture[0]);
-}
-
-int intersectRayObjectsEarliest(const Ray<float> &ray, float &t, float &u, float &v, unsigned int &hitTri, int &prevHitTri, float &t_min, float &u_min, float &v_min) {
-	//======== added ========//
-	t_min = t;
-	int currentNearestMesh = -1;
-	//=======================//
-
-	// iterate over all meshes
-	for (unsigned int i = 0; i < meshes.size(); i++) {
-		// optional: check ray versus bounding box first (t must have been initialized!)
-		if (rayAABBIntersect(ray, meshes[i].boundingBoxMin, meshes[i].boundingBoxMax, 0.0f, t) == false) continue;
-		// get triangle information
-		vector<Vec3f>& vertices = meshes[i].getVertices();
-		vector<Vec3ui>& triangles = meshes[i].getTriangles();
-		// brute force: iterate over all triangles of the mesh
-		for (unsigned int j = 0; j < triangles.size(); j++) {
-			Vec3f& p0 = vertices[triangles[j][0]];
-			Vec3f& p1 = vertices[triangles[j][1]];
-			Vec3f& p2 = vertices[triangles[j][2]];
-			int hit = ray.triangleIntersect(&p0.x, &p1.x, &p2.x, u, v, t);
-			intersectionTests++;
-			if (hit == 1 && t > 0.0f && j != prevHitTri) {
-				//return i;
-
-				//======== added ========//
-				if (t < t_min) {
-					t_min = t;
-					hitTri = j;
-					currentNearestMesh = i;
-					u_min = u;
-					v_min = v;
-				}
-				//=======================//
-			}
-		}
-	}
-	// changed
-	return currentNearestMesh;
-}
-
-// Smits’ method: Brian Smits. Efficient bounding box intersection. Ray tracing news, 15(1), 2002.
-bool rayAABBIntersect(const Ray<float> &r, const Vec3f& vmin, const Vec3f& vmax, float t0, float t1) {
-	float tmin, tmax, tymin, tymax, tzmin, tzmax;
-	if (r.d.x >= 0) {
-		tmin = (vmin.x - r.o.x) / r.d.x;
-		tmax = (vmax.x - r.o.x) / r.d.x;
-	}
-	else {
-		tmin = (vmax.x - r.o.x) / r.d.x;
-		tmax = (vmin.x - r.o.x) / r.d.x;
-	}
-	if (r.d.y >= 0) {
-		tymin = (vmin.y - r.o.y) / r.d.y;
-		tymax = (vmax.y - r.o.y) / r.d.y;
-	}
-	else {
-		tymin = (vmax.y - r.o.y) / r.d.y;
-		tymax = (vmin.y - r.o.y) / r.d.y;
-	}
-	if ((tmin > tymax) || (tymin > tmax))
-		return false;
-
-	if (tymin > tmin)
-		tmin = tymin;
-	if (tymax < tmax)
-		tmax = tymax;
-
-	if (r.d.z >= 0) {
-		tzmin = (vmin.z - r.o.z) / r.d.z;
-		tzmax = (vmax.z - r.o.z) / r.d.z;
-	}
-	else {
-		tzmin = (vmax.z - r.o.z) / r.d.z;
-		tzmax = (vmin.z - r.o.z) / r.d.z;
-	}
-
-	if ((tmin > tzmax) || (tzmin > tmax))
-		return false;
-
-	if (tzmin > tmin)
-		tmin = tzmin;
-	if (tzmax < tmax)
-		tmax = tzmax;
-
-	return ((tmin < t1) && (tmax > t0));
 }
 
 // =================
