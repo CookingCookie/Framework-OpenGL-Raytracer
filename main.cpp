@@ -331,7 +331,7 @@ void raytrace() {
 			float t_min, u_min, v_min;
 			if ((hitMesh = intersectRayObjectsEarliest(ray, t, u, v, hitTri, t_min, u_min, v_min)) != -1) {
 				// TODO: calculate color
-
+				//======== added ========//
 				// calculate where the triangle has been hit by the ray
 				Vec3f hitPoint = ray.o + ray.d * t_min;
 
@@ -358,7 +358,7 @@ void raytrace() {
 
 				// do the phong illumination algorithm
 				Vec3f rgb = phong.IlluminationCalculation(objects[hitMesh], lights, hitPoint, interpolatedNormal, V);
-
+				//=======================//
 				pictureRGB[pixel] = rgb;
 				hits++;
 			}
