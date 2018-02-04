@@ -19,10 +19,6 @@ public:
 	Vec3f IlluminationCalculation(SceneObject& sceneObject, vector <light>& lightSources,
 		Vec3f hitPoint, Vec3f N, Vec3f V, vector <unsigned int> S);
 
-	Vec3f CalcAmbientTerm(SceneObject& sceneObject);
-
-	Vec3f IlluminationCalculation_correct_Phong(SceneObject& sceneObject, vector <light>& lightSources, Vec3f hitPoint, Vec3f N, Vec3f V);
-
 private:
 	// mirror coefficient 
 	unsigned int Ke = 64;
