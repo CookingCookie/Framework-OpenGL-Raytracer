@@ -176,8 +176,10 @@ Vec3f RecursiveRayTracer::calculateTransparency(vector<SceneObject> objects, int
 	// transparency ray
 	if (objects[hitMesh].opacity > 0.0f) {
 		// calculate reflective ray
-		Vec3f transparentRayDirection = helper.getRefrDir(ray.d, interpolatedNormal, hitMesh);
-		Ray <float> transparentRay(&hitPoint[0], &transparentRayDirection[0]);
+		//Vec3f transparentRayDirection = helper.getRefrDir(ray.d, interpolatedNormal, hitMesh);
+		//Ray <float> transparentRay(&hitPoint[0], &transparentRayDirection[0]);
+		Vec3f ray_d = ray.d;
+		Ray <float> transparentRay(&hitPoint[0], &ray_d[0]);
 		float t2 = 1000.0f;              // ray parameter hit point, initialized with max view length
 		float u2, v2;                     // barycentric coordinates (w = 1-u-v)
 		int prev2 = hitTri;
