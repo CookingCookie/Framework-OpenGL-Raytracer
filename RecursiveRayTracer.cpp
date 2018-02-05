@@ -83,7 +83,7 @@ Vec3f RecursiveRayTracer::calculateReflection(vector<SceneObject> objects, int h
 
 		if ((hitMesh2 = intersection.intersectRayObjectsEarliest(reflectiveRay, t2, u2, v2, hitTri2, prev2, t_min2, u_min2, v_min2, meshes, intersectionTests)) != -1) {
 			d++;
-			return reflectiveRayIntensity * calculateColor(color, reflectiveRay, u_min2, v_min2, t_min2, hitTri2, hitMesh2, d_max, d, reflectiveRayIntensity, transparentRayIntensity, meshes, intersectionTests, lights, cameraDir, objects);
+			return objects[hitMesh].reflectivity * calculateColor(color, reflectiveRay, u_min2, v_min2, t_min2, hitTri2, hitMesh2, d_max, d, reflectiveRayIntensity, transparentRayIntensity, meshes, intersectionTests, lights, cameraDir, objects);
 		}
 	}
 
@@ -187,7 +187,7 @@ Vec3f RecursiveRayTracer::calculateTransparency(vector<SceneObject> objects, int
 
 		if ((hitMesh2 = intersection.intersectRayObjectsEarliest(transparentRay, t2, u2, v2, hitTri2, prev2, t_min2, u_min2, v_min2, meshes, intersectionTests)) != -1) {
 			d++;
-			return transparentRayIntensity * calculateColor(color, transparentRay, u_min2, v_min2, t_min2, hitTri2, hitMesh2, d_max, d, reflectiveRayIntensity, transparentRayIntensity, meshes, intersectionTests, lights, cameraDir, objects);
+			return objects[hitMesh].opacity * calculateColor(color, transparentRay, u_min2, v_min2, t_min2, hitTri2, hitMesh2, d_max, d, reflectiveRayIntensity, transparentRayIntensity, meshes, intersectionTests, lights, cameraDir, objects);
 		}
 	}
 
@@ -224,7 +224,7 @@ Vec3f RecursiveRayTracer::calculateColor(Vec3f color, Ray <float> ray, float u_m
 
 	// calculate refraction
 	//color += calculateRefraction(objects, hitMesh, ray, interpolatedNormal, hitPoint, hitTri, d, meshes, intersectionTests,
-	//	reflectiveRayIntensity, d_max, refractiveRayIntensity, color, lights, cameraDir);
+	//	reflectiveRayIntensity, d_max, transparentRayIntensity, color, lights, cameraDir);
 
 	return color;
 }

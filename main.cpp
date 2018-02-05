@@ -69,11 +69,11 @@ int main(int argc, char** argv) {
 	textureIDs.push_back(loadTexture(image));
 	// add object attributes (material, texture, ...)
 	SceneObject so;
-	//============ added ===============//
+	//============ added ===============// Ballon
 	so.reflectivity = 0.0f;
 	so.opacity = 0.0f;
 	so.refraction = 0.0f;
-	//==================================//
+	//==================================// 
 	so.matAmbient[0] = 0.2f; so.matAmbient[1] = 0.1f; so.matAmbient[2] = 0.1f; so.matAmbient[3] = 1.0f;
 	so.matDiffuse[0] = 0.6f; so.matDiffuse[1] = 0.3f; so.matDiffuse[2] = 0.3f; so.matDiffuse[3] = 1.0f;
 	so.matSpecular[0] = 0.4f; so.matSpecular[1] = 0.4f; so.matSpecular[2] = 0.4f; so.matSpecular[3] = 1.0f;
@@ -81,10 +81,10 @@ int main(int argc, char** argv) {
 	so.textureID = textureIDs[0];
 	objects.push_back(so);
 
-	//============ added ===============//
+	//============ added ===============// Delphin
 	so.reflectivity = 0.0f;
-	so.opacity = 0.2f;
-	so.refraction = 0.5f;
+	so.opacity = 0.8f;
+	so.refraction = 0.0f;
 	//==================================//
 	so.matAmbient[0] = 0.1f; so.matAmbient[1] = 0.2f; so.matAmbient[2] = 0.1f; so.matAmbient[3] = 1.0f;
 	so.matDiffuse[0] = 0.3f; so.matDiffuse[1] = 0.6f; so.matDiffuse[2] = 0.3f; so.matDiffuse[3] = 1.0f;
@@ -94,8 +94,8 @@ int main(int argc, char** argv) {
 	objects.push_back(so);
 
 
-	//============ added ===============//
-	so.reflectivity = 1.0f;
+	//============ added ===============// Teddy
+	so.reflectivity = 0.2f;
 	so.opacity = 0.0f;
 	so.refraction = 0.0f;
 	so.matAmbient[0] = 0.3f; so.matAmbient[1] = 0.3f; so.matAmbient[2] = 0.3f; so.matAmbient[3] = 1.0f;
