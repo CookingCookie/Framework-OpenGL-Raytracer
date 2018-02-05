@@ -47,17 +47,7 @@ vector <unsigned int> RecursiveRayTracer::shadowRay(Vec3f hitPoint, unsigned int
 	return S;
 }
 
-Vec3f RecursiveRayTracer::calculateColor(Vec3f color, Ray <float> ray, float u_min, float v_min, float t_min, unsigned int hitTri, int hitMesh, unsigned int d_max,
-	unsigned int &d, float reflectiveRayIntensity, float refractiveRayIntensity, vector<TriangleMesh> &meshes, unsigned int &intersectionTests, vector <light> lights, Vec3f cameraDir, vector<SceneObject> objects) {
-	// recursion anchor. Ray has been traced for the maximum amount of times already
-	if (d > d_max) return Vec3f();
-
-	// calculate where the triangle has been hit by the ray
-	Vec3f hitPoint = ray.o + ray.d * t_min;
-
-	// send out shadow feeler ray
-	vector <unsigned int> S = shadowRay(hitPoint, hitTri, lights, meshes, intersectionTests);
-
+Vec3f RecursiveRayTracer::calculateInterpolatedNormal(vector<TriangleMesh> &meshes, int hitMesh, unsigned int hitTri, float u_min, float v_min) {
 	// get the triangle's vertex normals
 	Vec3f vec1, vec2, vertexNormal0, vertexNormal1, vertexNormal2, interpolatedNormal;
 	unsigned int id0, id1, id2;
@@ -73,15 +63,12 @@ Vec3f RecursiveRayTracer::calculateColor(Vec3f color, Ray <float> ray, float u_m
 	// use characteristic of barycentric coordinates (u + v + w = 1) to get w
 	float w_min = 1 - u_min - v_min;
 	// interpolate the normal 
-	interpolatedNormal = w_min * vertexNormal0 + u_min * vertexNormal1 + v_min * vertexNormal2;
+	return w_min * vertexNormal0 + u_min * vertexNormal1 + v_min * vertexNormal2;
+}
 
-	// calculate vector pointing from the hit point to the camera (eye)
-	Vec3f V = cameraDir - hitPoint;
-	V.normalize();
-
-	// do the phong illumination algorithm
-	color = phong.IlluminationCalculation(objects[hitMesh], lights, hitPoint, interpolatedNormal, V, S);
-
+Vec3f RecursiveRayTracer::calculateReflection(vector<SceneObject> objects, int hitMesh, Ray <float> ray, Vec3f interpolatedNormal, Vec3f hitPoint, 
+	unsigned int hitTri, unsigned int &d, vector<TriangleMesh> &meshes, unsigned int &intersectionTests, float reflectiveRayIntensity, 
+	unsigned int d_max, float refractiveRayIntensity, Vec3f color, vector <light> lights, Vec3f cameraDir) {
 	// reflection ray
 	if (objects[hitMesh].reflectivity > 0.0f) {
 		// calculate reflective ray
@@ -96,10 +83,15 @@ Vec3f RecursiveRayTracer::calculateColor(Vec3f color, Ray <float> ray, float u_m
 
 		if ((hitMesh2 = intersection.intersectRayObjectsEarliest(reflectiveRay, t2, u2, v2, hitTri2, prev2, t_min2, u_min2, v_min2, meshes, intersectionTests)) != -1) {
 			d++;
-			color += reflectiveRayIntensity * calculateColor(color, reflectiveRay, u_min2, v_min2, t_min2, hitTri2, hitMesh2, d_max, d, reflectiveRayIntensity, refractiveRayIntensity, meshes, intersectionTests, lights, cameraDir, objects);
+			return reflectiveRayIntensity * calculateColor(color, reflectiveRay, u_min2, v_min2, t_min2, hitTri2, hitMesh2, d_max, d, reflectiveRayIntensity, refractiveRayIntensity, meshes, intersectionTests, lights, cameraDir, objects);
 		}
 	}
 
+	return Vec3f(0,0,0);
+}
+
+Vec3f RecursiveRayTracer::calculateTransparency(vector<SceneObject> objects, int hitMesh, Ray <float> ray, Vec3f interpolatedNormal, Vec3f hitPoint,
+	unsigned int hitTri, unsigned int &d, vector<TriangleMesh> &meshes, unsigned int &intersectionTests, float reflectiveRayIntensity, unsigned int d_max, float refractiveRayIntensity, Vec3f color, vector <light> lights, Vec3f cameraDir) {
 	// transparency ray
 	if (objects[hitMesh].opacity > 0.0f) {
 		// calculate reflective ray
@@ -114,9 +106,40 @@ Vec3f RecursiveRayTracer::calculateColor(Vec3f color, Ray <float> ray, float u_m
 
 		if ((hitMesh2 = intersection.intersectRayObjectsEarliest(refractiveRay, t2, u2, v2, hitTri2, prev2, t_min2, u_min2, v_min2, meshes, intersectionTests)) != -1) {
 			d++;
-			color += refractiveRayIntensity * calculateColor(color, refractiveRay, u_min2, v_min2, t_min2, hitTri2, hitMesh2, d_max, d, reflectiveRayIntensity, refractiveRayIntensity, meshes, intersectionTests, lights, cameraDir, objects);
+			return refractiveRayIntensity * calculateColor(color, refractiveRay, u_min2, v_min2, t_min2, hitTri2, hitMesh2, d_max, d, reflectiveRayIntensity, refractiveRayIntensity, meshes, intersectionTests, lights, cameraDir, objects);
 		}
 	}
+
+	return Vec3f(0, 0, 0);
+}
+
+Vec3f RecursiveRayTracer::calculateColor(Vec3f color, Ray <float> ray, float u_min, float v_min, float t_min, unsigned int hitTri, int hitMesh, unsigned int d_max,
+	unsigned int &d, float reflectiveRayIntensity, float refractiveRayIntensity, vector<TriangleMesh> &meshes, unsigned int &intersectionTests, vector <light> lights, Vec3f cameraDir, vector<SceneObject> objects) {
+	// recursion anchor. Ray has been traced for the maximum amount of times already
+	if (d > d_max) return Vec3f();
+
+	// calculate where the triangle has been hit by the ray
+	Vec3f hitPoint = ray.o + ray.d * t_min;
+
+	// send out shadow feeler ray
+	vector <unsigned int> S = shadowRay(hitPoint, hitTri, lights, meshes, intersectionTests);
+	
+	Vec3f interpolatedNormal = calculateInterpolatedNormal(meshes, hitMesh, hitTri, u_min, v_min);
+
+	// calculate vector pointing from the hit point to the camera (eye)
+	Vec3f V = cameraDir - hitPoint;
+	V.normalize();
+
+	// do the phong illumination algorithm
+	color = phong.IlluminationCalculation(objects[hitMesh], lights, hitPoint, interpolatedNormal, V, S);
+
+	// calculate reflexion
+	color += calculateReflection(objects, hitMesh, ray, interpolatedNormal, hitPoint, hitTri, d, meshes, intersectionTests, 
+		reflectiveRayIntensity, d_max, refractiveRayIntensity, color, lights, cameraDir);
+
+	// calculate transparency
+	color += calculateTransparency(objects, hitMesh, ray, interpolatedNormal, hitPoint, hitTri, d, meshes, intersectionTests,
+		reflectiveRayIntensity, d_max, refractiveRayIntensity, color, lights, cameraDir);
 
 	return color;
 }
