@@ -72,6 +72,7 @@ int main(int argc, char** argv) {
 	//============ added ===============//
 	so.reflectivity = 0.0f;
 	so.opacity = 0.0f;
+	so.refraction = 0.0f;
 	//==================================//
 	so.matAmbient[0] = 0.2f; so.matAmbient[1] = 0.1f; so.matAmbient[2] = 0.1f; so.matAmbient[3] = 1.0f;
 	so.matDiffuse[0] = 0.6f; so.matDiffuse[1] = 0.3f; so.matDiffuse[2] = 0.3f; so.matDiffuse[3] = 1.0f;
@@ -83,6 +84,7 @@ int main(int argc, char** argv) {
 	//============ added ===============//
 	so.reflectivity = 0.0f;
 	so.opacity = 0.2f;
+	so.refraction = 0.5f;
 	//==================================//
 	so.matAmbient[0] = 0.1f; so.matAmbient[1] = 0.2f; so.matAmbient[2] = 0.1f; so.matAmbient[3] = 1.0f;
 	so.matDiffuse[0] = 0.3f; so.matDiffuse[1] = 0.6f; so.matDiffuse[2] = 0.3f; so.matDiffuse[3] = 1.0f;
@@ -95,6 +97,7 @@ int main(int argc, char** argv) {
 	//============ added ===============//
 	so.reflectivity = 1.0f;
 	so.opacity = 0.0f;
+	so.refraction = 0.0f;
 	so.matAmbient[0] = 0.3f; so.matAmbient[1] = 0.3f; so.matAmbient[2] = 0.3f; so.matAmbient[3] = 1.0f;
 	so.matDiffuse[0] = 0.3f; so.matDiffuse[1] = 0.3f; so.matDiffuse[2] = 0.3f; so.matDiffuse[3] = 1.0f;
 	so.matSpecular[0] = 0.8f; so.matSpecular[1] = 0.8f; so.matSpecular[2] = 0.8f; so.matSpecular[3] = 1.0f;
@@ -385,11 +388,11 @@ void raytrace() {
 			unsigned int d = 0;
 			float t_min, u_min, v_min;
 			float reflectiveRayIntensity = 0.1f;
-			float refractiveRayIntensity = 0.2f;
+			float transparentRayIntensity = 0.2f;
 			Vec3f color = Vec3f();
 			if ((hitMesh = intersection.intersectRayObjectsEarliest(ray, t, u, v, hitTri, prev, t_min, u_min, v_min, meshes, intersectionTests)) != -1) {
 				// TODO: calculate color
-				pictureRGB[pixel] = rrt.calculateColor(color, ray, u_min, v_min, t_min, hitTri, hitMesh, d_max, d, reflectiveRayIntensity, refractiveRayIntensity, meshes, intersectionTests, lights, cameraDir, objects);
+				pictureRGB[pixel] = rrt.calculateColor(color, ray, u_min, v_min, t_min, hitTri, hitMesh, d_max, d, reflectiveRayIntensity, transparentRayIntensity, meshes, intersectionTests, lights, cameraDir, objects);
 				hits++;
 			}
 			// cout "." every 1/50 of all pixels

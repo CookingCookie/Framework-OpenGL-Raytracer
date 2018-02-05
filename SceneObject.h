@@ -8,6 +8,7 @@ struct SceneObject {
 	float matShininess;
 	float reflectivity;
 	float opacity;
+	float refraction;
 	GLuint textureID;
 };
 
