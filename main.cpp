@@ -71,7 +71,7 @@ int main(int argc, char** argv) {
 	SceneObject so;
 	//============ added ===============// Ballon
 	so.reflectivity = 0.0f;
-	so.opacity = 0.0f;
+	so.opacity = 1.0f;
 	so.refraction = 0.0f;
 	//==================================// 
 	so.matAmbient[0] = 0.2f; so.matAmbient[1] = 0.1f; so.matAmbient[2] = 0.1f; so.matAmbient[3] = 1.0f;
@@ -83,7 +83,7 @@ int main(int argc, char** argv) {
 
 	//============ added ===============// Delphin
 	so.reflectivity = 0.0f;
-	so.opacity = 0.8f;
+	so.opacity = 1.0f;
 	so.refraction = 0.0f;
 	//==================================//
 	so.matAmbient[0] = 0.1f; so.matAmbient[1] = 0.2f; so.matAmbient[2] = 0.1f; so.matAmbient[3] = 1.0f;
@@ -96,7 +96,7 @@ int main(int argc, char** argv) {
 
 	//============ added ===============// Teddy
 	so.reflectivity = 0.2f;
-	so.opacity = 0.0f;
+	so.opacity = 1.0f;
 	so.refraction = 0.0f;
 	so.matAmbient[0] = 0.3f; so.matAmbient[1] = 0.3f; so.matAmbient[2] = 0.3f; so.matAmbient[3] = 1.0f;
 	so.matDiffuse[0] = 0.3f; so.matDiffuse[1] = 0.3f; so.matDiffuse[2] = 0.3f; so.matDiffuse[3] = 1.0f;
@@ -384,7 +384,7 @@ void raytrace() {
 			int hitMesh;
 			int prev = -1;
 			unsigned int hitTri;
-			unsigned int d_max = 6;
+			unsigned int d_max = 3;
 			unsigned int d = 0;
 			float t_min, u_min, v_min;
 			float reflectiveRayIntensity = 0.1f;
