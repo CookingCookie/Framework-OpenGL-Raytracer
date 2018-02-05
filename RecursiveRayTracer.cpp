@@ -221,8 +221,8 @@ Vec3f RecursiveRayTracer::calculateColor(Vec3f color, Ray <float> ray, float u_m
 		reflectiveRayIntensity, d_max, transparentRayIntensity, color, lights, cameraDir);
 
 	// calculate transparency
-	color += calculateTransparency(objects, hitMesh, ray, interpolatedNormal, hitPoint, hitTri, d, meshes, intersectionTests,
-		reflectiveRayIntensity, d_max, transparentRayIntensity, color, lights, cameraDir);
+	//color += calculateTransparency(objects, hitMesh, ray, interpolatedNormal, hitPoint, hitTri, d, meshes, intersectionTests,
+	//	reflectiveRayIntensity, d_max, transparentRayIntensity, color, lights, cameraDir);
 
 	// calculate refraction
 	//color += calculateRefraction(objects, hitMesh, ray, interpolatedNormal, hitPoint, hitTri, d, meshes, intersectionTests,

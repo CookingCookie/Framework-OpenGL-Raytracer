@@ -61,6 +61,14 @@ int main(int argc, char** argv) {
 	filename = "Models/Sketched-Teddy-org.off";
 	tm3.loadOFF(filename.c_str(), Vec3f(6.6f, 0.0f, 0.9f), 7.0f);
 	meshes.push_back(tm3);
+	TriangleMesh tm4;
+	filename = "Models/ballon.off";
+	tm1.loadOFF(filename.c_str(), Vec3f(1.0f, 0.0f, 1.0f), 20.0f);
+	meshes.push_back(tm1);
+	TriangleMesh tm5;
+	filename = "Models/ballon.off";
+	tm1.loadOFF(filename.c_str(), Vec3f(1.0f, 0.0f, 2.0f), 20.0f);
+	meshes.push_back(tm1);
 	for (unsigned int i = 0; i < meshes.size(); i++) meshes[i].coutData();
 	// load textures
 	Image* image;
@@ -70,8 +78,8 @@ int main(int argc, char** argv) {
 	// add object attributes (material, texture, ...)
 	SceneObject so;
 	//============ added ===============// Ballon
-	so.reflectivity = 0.0f;
-	so.opacity = 1.0f;
+	so.reflectivity = 0.4f;
+	so.opacity = 0.0f;
 	so.refraction = 0.0f;
 	//==================================// 
 	so.matAmbient[0] = 0.2f; so.matAmbient[1] = 0.1f; so.matAmbient[2] = 0.1f; so.matAmbient[3] = 1.0f;
@@ -82,8 +90,8 @@ int main(int argc, char** argv) {
 	objects.push_back(so);
 
 	//============ added ===============// Delphin
-	so.reflectivity = 0.0f;
-	so.opacity = 1.0f;
+	so.reflectivity = 0.2f;
+	so.opacity = 3.0f;
 	so.refraction = 0.0f;
 	//==================================//
 	so.matAmbient[0] = 0.1f; so.matAmbient[1] = 0.2f; so.matAmbient[2] = 0.1f; so.matAmbient[3] = 1.0f;
@@ -96,7 +104,7 @@ int main(int argc, char** argv) {
 
 	//============ added ===============// Teddy
 	so.reflectivity = 0.2f;
-	so.opacity = 1.0f;
+	so.opacity = 0.0f;
 	so.refraction = 0.0f;
 	so.matAmbient[0] = 0.3f; so.matAmbient[1] = 0.3f; so.matAmbient[2] = 0.3f; so.matAmbient[3] = 1.0f;
 	so.matDiffuse[0] = 0.3f; so.matDiffuse[1] = 0.3f; so.matDiffuse[2] = 0.3f; so.matDiffuse[3] = 1.0f;
@@ -106,9 +114,33 @@ int main(int argc, char** argv) {
 	objects.push_back(so);
 	//==================================//
 
+	//============ added ===============// Ballon
+	so.reflectivity = 0.3f;
+	so.opacity = 0.0f;
+	so.refraction = 0.0f;
+	//==================================// 
+	so.matAmbient[0] = 0.2f; so.matAmbient[1] = 0.5f; so.matAmbient[2] = 0.5f; so.matAmbient[3] = 1.0f;
+	so.matDiffuse[0] = 0.6f; so.matDiffuse[1] = 0.7f; so.matDiffuse[2] = 0.2f; so.matDiffuse[3] = 1.0f;
+	so.matSpecular[0] = 0.4f; so.matSpecular[1] = 0.4f; so.matSpecular[2] = 0.4f; so.matSpecular[3] = 1.0f;
+	so.matShininess = 0.8f * 128.0f;
+	so.textureID = textureIDs[0];
+	objects.push_back(so);
+
+	//============ added ===============// Ballon
+	so.reflectivity = 0.5f;
+	so.opacity = 0.0f;
+	so.refraction = 0.0f;
+	//==================================// 
+	so.matAmbient[0] = 0.2f; so.matAmbient[1] = 0.8f; so.matAmbient[2] = 0.4f; so.matAmbient[3] = 0.2f;
+	so.matDiffuse[0] = 0.6f; so.matDiffuse[1] = 0.9f; so.matDiffuse[2] = 0.5f; so.matDiffuse[3] = 0.3f;
+	so.matSpecular[0] = 0.4f; so.matSpecular[1] = 0.4f; so.matSpecular[2] = 0.4f; so.matSpecular[3] = 1.0f;
+	so.matShininess = 0.8f * 128.0f;
+	so.textureID = textureIDs[0];
+	objects.push_back(so);
+
 	//======== added ========//
 	lights.push_back(light0);
-	lights.push_back(light1);
+	//lights.push_back(light1);
 	numOfLights = lights.size();
 	//=======================//
 
@@ -161,15 +193,15 @@ void setDefaults() {
 	cameraDir.set(0, 0, -1);
 	movementSpeed = 0.02f;
 	// light0 information
-	light0.lightPos.set(20.0f, 2.0f, 0.0f);
+	light0.lightPos.set(50.0f, 2.0f, 0.0f);
 	light0.lightMotionSpeed = 0.05f;
 	light0.moveLight = false;
 	light0.lightIntensity = 0.2f;
 	// light1 information
-	light1.lightPos.set(14.0f, 6.0f, 0.0f);
-	light1.lightMotionSpeed = 0.05f;
-	light1.moveLight = false;
-	light1.lightIntensity = 0.3f;
+	//light1.lightPos.set(14.0f, 6.0f, 0.0f);
+	//light1.lightMotionSpeed = 0.05f;
+	//light1.moveLight = false;
+	//light1.lightIntensity = 0.3f;
 	// mouse information
 	mouseButton = 0;
 	mouseSensitivy = 1.0f;
@@ -337,7 +369,7 @@ void renderScene() {
 			glMaterialfv(GL_FRONT, GL_AMBIENT, objects[i].matAmbient);
 			glMaterialfv(GL_FRONT, GL_DIFFUSE, objects[i].matDiffuse);
 			glMaterialfv(GL_FRONT, GL_SPECULAR, objects[i].matSpecular);
-			glMaterialf(GL_FRONT, GL_SHININESS, objects[i].matShininess);
+			glMaterialf(GL_FRONT, GL_SHININESS, objects[i].matShininess);			
 			glBindTexture(GL_TEXTURE_2D, objects[i].textureID);
 			// draw
 			meshes[i].draw();
