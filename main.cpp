@@ -82,21 +82,21 @@ int main(int argc, char** argv) {
 	so.opacity = 0.0f;
 	so.refraction = 0.0f;
 	//==================================// 
-	so.matAmbient[0] = 0.2f; so.matAmbient[1] = 0.1f; so.matAmbient[2] = 0.1f; so.matAmbient[3] = 1.0f;
-	so.matDiffuse[0] = 0.6f; so.matDiffuse[1] = 0.3f; so.matDiffuse[2] = 0.3f; so.matDiffuse[3] = 1.0f;
-	so.matSpecular[0] = 0.4f; so.matSpecular[1] = 0.4f; so.matSpecular[2] = 0.4f; so.matSpecular[3] = 1.0f;
+	so.matAmbient[0] = 0.2f; so.matAmbient[1] = 0.1f; so.matAmbient[2] = 0.1f; so.matAmbient[3] = 0.3f;
+	so.matDiffuse[0] = 0.6f; so.matDiffuse[1] = 0.3f; so.matDiffuse[2] = 0.3f; so.matDiffuse[3] = 0.3f;
+	so.matSpecular[0] = 0.4f; so.matSpecular[1] = 0.4f; so.matSpecular[2] = 0.4f; so.matSpecular[3] = 0.3f;
 	so.matShininess = 0.8f * 128.0f;
 	so.textureID = textureIDs[0];
 	objects.push_back(so);
 
 	//============ added ===============// Delphin
 	so.reflectivity = 0.2f;
-	so.opacity = 3.0f;
+	so.opacity = 0.0f;
 	so.refraction = 0.0f;
 	//==================================//
-	so.matAmbient[0] = 0.1f; so.matAmbient[1] = 0.2f; so.matAmbient[2] = 0.1f; so.matAmbient[3] = 1.0f;
-	so.matDiffuse[0] = 0.3f; so.matDiffuse[1] = 0.6f; so.matDiffuse[2] = 0.3f; so.matDiffuse[3] = 1.0f;
-	so.matSpecular[0] = 0.4f; so.matSpecular[1] = 0.4f; so.matSpecular[2] = 0.4f; so.matSpecular[3] = 1.0f;
+	so.matAmbient[0] = 0.1f; so.matAmbient[1] = 0.2f; so.matAmbient[2] = 0.3f; so.matAmbient[3] = 0.3f;
+	so.matDiffuse[0] = 0.3f; so.matDiffuse[1] = 0.6f; so.matDiffuse[2] = 0.3f; so.matDiffuse[3] = 0.3f;
+	so.matSpecular[0] = 0.4f; so.matSpecular[1] = 0.4f; so.matSpecular[2] = 0.4f; so.matSpecular[3] = 0.3f;
 	so.matShininess = 0.8f * 128.0f;
 	so.textureID = textureIDs[0];
 	objects.push_back(so);
@@ -106,9 +106,9 @@ int main(int argc, char** argv) {
 	so.reflectivity = 0.2f;
 	so.opacity = 0.0f;
 	so.refraction = 0.0f;
-	so.matAmbient[0] = 0.3f; so.matAmbient[1] = 0.3f; so.matAmbient[2] = 0.3f; so.matAmbient[3] = 1.0f;
-	so.matDiffuse[0] = 0.3f; so.matDiffuse[1] = 0.3f; so.matDiffuse[2] = 0.3f; so.matDiffuse[3] = 1.0f;
-	so.matSpecular[0] = 0.8f; so.matSpecular[1] = 0.8f; so.matSpecular[2] = 0.8f; so.matSpecular[3] = 1.0f;
+	so.matAmbient[0] = 0.3f; so.matAmbient[1] = 0.3f; so.matAmbient[2] = 0.3f; so.matAmbient[3] = 0.3f;
+	so.matDiffuse[0] = 0.3f; so.matDiffuse[1] = 0.3f; so.matDiffuse[2] = 0.3f; so.matDiffuse[3] = 0.3f;
+	so.matSpecular[0] = 0.8f; so.matSpecular[1] = 0.3f; so.matSpecular[2] = 0.3f; so.matSpecular[3] = 0.3f;
 	so.matShininess = 0.9f * 128.0f;
 	so.textureID = textureIDs[0];
 	objects.push_back(so);
@@ -119,9 +119,9 @@ int main(int argc, char** argv) {
 	so.opacity = 0.0f;
 	so.refraction = 0.0f;
 	//==================================// 
-	so.matAmbient[0] = 0.2f; so.matAmbient[1] = 0.5f; so.matAmbient[2] = 0.5f; so.matAmbient[3] = 1.0f;
-	so.matDiffuse[0] = 0.6f; so.matDiffuse[1] = 0.7f; so.matDiffuse[2] = 0.2f; so.matDiffuse[3] = 1.0f;
-	so.matSpecular[0] = 0.4f; so.matSpecular[1] = 0.4f; so.matSpecular[2] = 0.4f; so.matSpecular[3] = 1.0f;
+	so.matAmbient[0] = 0.2f; so.matAmbient[1] = 0.5f; so.matAmbient[2] = 0.5f; so.matAmbient[3] = 0.3f;
+	so.matDiffuse[0] = 0.6f; so.matDiffuse[1] = 0.7f; so.matDiffuse[2] = 0.2f; so.matDiffuse[3] = 0.3f;
+	so.matSpecular[0] = 0.4f; so.matSpecular[1] = 0.4f; so.matSpecular[2] = 0.4f; so.matSpecular[3] = 0.3f;
 	so.matShininess = 0.8f * 128.0f;
 	so.textureID = textureIDs[0];
 	objects.push_back(so);
@@ -133,7 +133,7 @@ int main(int argc, char** argv) {
 	//==================================// 
 	so.matAmbient[0] = 0.2f; so.matAmbient[1] = 0.8f; so.matAmbient[2] = 0.4f; so.matAmbient[3] = 0.2f;
 	so.matDiffuse[0] = 0.6f; so.matDiffuse[1] = 0.9f; so.matDiffuse[2] = 0.5f; so.matDiffuse[3] = 0.3f;
-	so.matSpecular[0] = 0.4f; so.matSpecular[1] = 0.4f; so.matSpecular[2] = 0.4f; so.matSpecular[3] = 1.0f;
+	so.matSpecular[0] = 0.4f; so.matSpecular[1] = 0.4f; so.matSpecular[2] = 0.4f; so.matSpecular[3] = 0.3f;
 	so.matShininess = 0.8f * 128.0f;
 	so.textureID = textureIDs[0];
 	objects.push_back(so);
