@@ -17,7 +17,10 @@ public:
 
 	// performes the phong illumination calculation
 	Vec3f IlluminationCalculation(SceneObject& sceneObject, vector <light>& lightSources,
-		Vec3f hitPoint, Vec3f N, Vec3f V, vector <unsigned int> S, Vec3f RecursiveRayIntensity, float Reflection, Vec3f transparencyIntensity, float transparency);
+		Vec3f hitPoint, Vec3f N, Vec3f V, vector <unsigned int> S, Vec3f RecursiveRayIntensity, Vec3f transparencyIntensity);
+
+	Vec3f IlluminationCalculation(SceneObject& sceneObject, vector <light>& lightSources,
+		Vec3f hitPoint, Vec3f N, Vec3f V, vector <unsigned int> S);
 
 private:
 	// mirror coefficient 

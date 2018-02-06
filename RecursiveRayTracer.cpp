@@ -66,31 +66,6 @@ Vec3f RecursiveRayTracer::calculateInterpolatedNormal(vector<TriangleMesh> &mesh
 	return w_min * vertexNormal0 + u_min * vertexNormal1 + v_min * vertexNormal2;
 }
 
-Vec3f RecursiveRayTracer::calculateReflection(vector<SceneObject> objects, int hitMesh, Ray <float> ray, Vec3f interpolatedNormal, Vec3f hitPoint, 
-	unsigned int hitTri, unsigned int &d, vector<TriangleMesh> &meshes, unsigned int &intersectionTests, float reflectiveRayIntensity, 
-	unsigned int d_max, float transparentRayIntensity, Vec3f color, vector <light> lights, Vec3f cameraDir) {
-	// reflection ray
-	if (objects[hitMesh].reflectivity > 0.0f) {
-		// calculate reflective ray
-		Vec3f reflectiveRayDirection = helper.reflectiveRayDirection(ray.d, interpolatedNormal);
-		Ray <float> reflectiveRay(&hitPoint[0], &reflectiveRayDirection[0]);
-		float t2 = 1000.0f;              // ray parameter hit point, initialized with max view length
-		float u2, v2;                     // barycentric coordinates (w = 1-u-v)
-		int prev2 = hitTri;
-		int hitMesh2;
-		unsigned int hitTri2;
-		float t_min2, u_min2, v_min2;
-
-		if ((hitMesh2 = intersection.intersectRayObjectsEarliest(reflectiveRay, t2, u2, v2, hitTri2, prev2, t_min2, u_min2, v_min2, meshes, intersectionTests)) != -1) {
-			d++;
-			// calculate reflective ray
-			return objects[hitMesh].reflectivity * calculateColor(color, reflectiveRay, u_min2, v_min2, t_min2, hitTri2, hitMesh2, d_max, d, reflectiveRayIntensity, transparentRayIntensity, meshes, intersectionTests, lights, cameraDir, objects);
-		}
-	}
-
-	return Vec3f(0,0,0);
-}
-
 float clamp(const float &lo, const float &hi, const float &v)
 {
 	return std::max(lo, std::min(hi, v));
@@ -101,8 +76,9 @@ Vec3f RecursiveRayTracer::refract(Ray <float> ray, Vec3f interpolatedNormal, con
 	float cosi = clamp((float)-1, (float)1, (float)(ray.d * interpolatedNormal));
 	float etai = 1, etat = ior;
 	Vec3f n = interpolatedNormal;
-	if (cosi < 0) { cosi = -cosi; }
-	else { std::swap(etai, etat); n = interpolatedNormal * -1; }
+	// if (cosi < 0) { cosi = -cosi; }
+	// else { std::swap(etai, etat); n = interpolatedNormal * -1; }
+	cosi = -cosi;
 	float eta = etai / etat;
 	float k = 1 - eta * eta * (1 - cosi * cosi);
 	Vec3f tmp = ray.d * eta + (eta * cosi - sqrtf(k)) * n;
@@ -132,8 +108,8 @@ void RecursiveRayTracer::fresnel(Ray <float> ray, Vec3f interpolatedNormal, cons
 }
 
 Vec3f RecursiveRayTracer::calculateRefraction(vector<SceneObject> objects, int hitMesh, Ray <float> ray, Vec3f interpolatedNormal, Vec3f hitPoint,
-	unsigned int hitTri, unsigned int &d, vector<TriangleMesh> &meshes, unsigned int &intersectionTests, float reflectiveRayIntensity, 
-	unsigned int d_max, float transparentRayIntensity, Vec3f color, vector <light> lights, Vec3f cameraDir)
+	unsigned int hitTri, unsigned int &d, vector<TriangleMesh> &meshes, unsigned int &intersectionTests, 
+	unsigned int d_max, Vec3f color, vector <light> lights, Vec3f cameraDir)
 {
 	if (objects[hitMesh].refraction > 0.0f) {
 		Vec3f refractionColor = Vec3f(0, 0, 0);
@@ -148,8 +124,8 @@ Vec3f RecursiveRayTracer::calculateRefraction(vector<SceneObject> objects, int h
 			Vec3f refractionDirection = refract(ray, interpolatedNormal, refractionRayIntensity).normalized();
 			//Vec3f refractionRayOrig = outside ? hitPoint - bias : hitPoint + bias;
 			Ray <float> refractionRay(&hitPoint[0], &refractionDirection[0]);
-			float t2 = 1000.0f;              // ray parameter hit point, initialized with max view length
-			float u2, v2;                     // barycentric coordinates (w = 1-u-v)
+			float t2 = 1000.0f;
+			float u2, v2;      
 			int prev2 = hitTri;
 			int hitMesh2;
 			unsigned int hitTri2;
@@ -157,7 +133,7 @@ Vec3f RecursiveRayTracer::calculateRefraction(vector<SceneObject> objects, int h
 
 			if ((hitMesh2 = intersection.intersectRayObjectsEarliest(refractionRay, t2, u2, v2, hitTri2, prev2, t_min2, u_min2, v_min2, meshes, intersectionTests)) != -1) {
 				d++;
-				refractionColor = calculateColor(color, refractionRay, u_min2, v_min2, t_min2, hitTri2, hitMesh2, d_max, d, reflectiveRayIntensity, transparentRayIntensity, meshes, intersectionTests, lights, cameraDir, objects);
+				refractionColor = calculateColor(color, refractionRay, u_min2, v_min2, t_min2, hitTri2, hitMesh2, d_max, d, meshes, intersectionTests, lights, cameraDir, objects);
 			}
 		}
 
@@ -169,36 +145,70 @@ Vec3f RecursiveRayTracer::calculateRefraction(vector<SceneObject> objects, int h
 		return /*reflectionColor * kr +*/ refractionColor * (1 - kr);
 	}
 
-	return Vec3f(0, 0, 0);
+	return Vec3f();
 }
 
 Vec3f RecursiveRayTracer::calculateTransparency(vector<SceneObject> objects, int hitMesh, Ray <float> ray, Vec3f interpolatedNormal, Vec3f hitPoint,
-	unsigned int hitTri, unsigned int &d, vector<TriangleMesh> &meshes, unsigned int &intersectionTests, float reflectiveRayIntensity, unsigned int d_max, float transparentRayIntensity, Vec3f color, vector <light> lights, Vec3f cameraDir) {
+	unsigned int hitTri, unsigned int &d, vector<TriangleMesh> &meshes, unsigned int &intersectionTests, unsigned int d_max, Vec3f color, vector <light> lights, Vec3f cameraDir) {
 	// transparency ray
-	if (objects[hitMesh].opacity > 0.0f) {
+
+	float objectOpacity = objects[hitMesh].opacity;
+
+	// check whether object is transparent at all
+	if (objectOpacity > 0.0f) {
 		// calculate reflective ray
-		//Vec3f transparentRayDirection = helper.getRefrDir(ray.d, interpolatedNormal, hitMesh);s
-		//Ray <float> transparentRay(&hitPoint[0], &transparentRayDirection[0]);
 		Vec3f ray_d = ray.d;
 		Ray <float> transparentRay(&hitPoint[0], &ray_d[0]);
-		float t2 = 1000.0f;              // ray parameter hit point, initialized with max view length
-		float u2, v2;                     // barycentric coordinates (w = 1-u-v)
+		float t2 = 1000.0f; 
+		float u2, v2;   
 		int prev2 = hitTri;
 		int hitMesh2;
 		unsigned int hitTri2;
 		float t_min2, u_min2, v_min2;
 
+		// check whether transparent ray hits anything
 		if ((hitMesh2 = intersection.intersectRayObjectsEarliest(transparentRay, t2, u2, v2, hitTri2, prev2, t_min2, u_min2, v_min2, meshes, intersectionTests)) != -1) {
 			d++;
-			return objects[hitMesh].opacity * calculateColor(color, transparentRay, u_min2, v_min2, t_min2, hitTri2, hitMesh2, d_max, d, reflectiveRayIntensity, transparentRayIntensity, meshes, intersectionTests, lights, cameraDir, objects);
+			// recursive call get color of the object that has been hit
+			return objectOpacity * calculateColor(color, transparentRay, u_min2, v_min2, t_min2, hitTri2, hitMesh2, d_max, d, meshes, intersectionTests, lights, cameraDir, objects);
 		}
 	}
 
-	return Vec3f(0, 0, 0);
+	return Vec3f();
+}
+
+Vec3f RecursiveRayTracer::calculateReflection(vector<SceneObject> objects, int hitMesh, Ray <float> ray, Vec3f interpolatedNormal, Vec3f hitPoint,
+	unsigned int hitTri, unsigned int &d, vector<TriangleMesh> &meshes, unsigned int &intersectionTests,
+	unsigned int d_max, Vec3f color, vector <light> lights, Vec3f cameraDir) {
+	// reflection ray
+
+	float objectReflection = objects[hitMesh].reflectivity;
+
+	// check whether object is reflective at all
+	if (objectReflection > 0.0f) {
+		// calculate reflective ray
+		Vec3f reflectiveRayDirection = helper.reflectiveRayDirection(ray.d, interpolatedNormal);
+		Ray <float> reflectiveRay(&hitPoint[0], &reflectiveRayDirection[0]);
+		float t2 = 1000.0f;  
+		float u2, v2;        
+		int prev2 = hitTri;
+		int hitMesh2;
+		unsigned int hitTri2;
+		float t_min2, u_min2, v_min2;
+
+		// check whether reflective ray hits anything
+		if ((hitMesh2 = intersection.intersectRayObjectsEarliest(reflectiveRay, t2, u2, v2, hitTri2, prev2, t_min2, u_min2, v_min2, meshes, intersectionTests)) != -1) {
+			d++;
+			// recursive call get color of the object that has been hit
+			return objectReflection * calculateColor(color, reflectiveRay, u_min2, v_min2, t_min2, hitTri2, hitMesh2, d_max, d, meshes, intersectionTests, lights, cameraDir, objects);
+		}
+	}
+
+	return Vec3f();
 }
 
 Vec3f RecursiveRayTracer::calculateColor(Vec3f color, Ray <float> ray, float u_min, float v_min, float t_min, unsigned int hitTri, int hitMesh, unsigned int d_max,
-	unsigned int &d, float reflectiveRayIntensity, float transparentRayIntensity, vector<TriangleMesh> &meshes, unsigned int &intersectionTests, vector <light> lights, Vec3f cameraDir, vector<SceneObject> objects) {
+	unsigned int &d, vector<TriangleMesh> &meshes, unsigned int &intersectionTests, vector <light> lights, Vec3f cameraDir, vector<SceneObject> objects) {
 	// recursion anchor. Ray has been traced for the maximum amount of times already
 	if (d > d_max) return Vec3f();
 
@@ -214,20 +224,16 @@ Vec3f RecursiveRayTracer::calculateColor(Vec3f color, Ray <float> ray, float u_m
 	Vec3f V = cameraDir - hitPoint;
 	V.normalize();
 
+	color = phong.IlluminationCalculation(objects[hitMesh], lights, hitPoint, interpolatedNormal, V, S);
+
 	// calculate reflexion
-	Vec3f  recursiveRayIntensity  = calculateReflection(objects, hitMesh, ray, interpolatedNormal, hitPoint, hitTri, d, meshes, intersectionTests,
-		reflectiveRayIntensity, d_max, transparentRayIntensity, color, lights, cameraDir);	
+	color += calculateReflection(objects, hitMesh, ray, interpolatedNormal, hitPoint, hitTri, d, meshes, intersectionTests, d_max, color, lights, cameraDir);	
 
 	// calculate transparency
-	Vec3f  transparencyIntensity = calculateTransparency(objects, hitMesh, ray, interpolatedNormal, hitPoint, hitTri, d, meshes, intersectionTests,
-		reflectiveRayIntensity, d_max, transparentRayIntensity, color, lights, cameraDir);
-
-	// do the phong illumination algorithm
-	color = phong.IlluminationCalculation(objects[hitMesh], lights, hitPoint, interpolatedNormal, V, S, recursiveRayIntensity, objects[hitMesh].reflectivity, transparencyIntensity, objects[hitMesh].opacity);
+	color += calculateTransparency(objects, hitMesh, ray, interpolatedNormal, hitPoint, hitTri, d, meshes, intersectionTests, d_max, color, lights, cameraDir);
 
 	// calculate refraction
-	//color += calculateRefraction(objects, hitMesh, ray, interpolatedNormal, hitPoint, hitTri, d, meshes, intersectionTests,
-	//	reflectiveRayIntensity, d_max, transparentRayIntensity, color, lights, cameraDir);
+	color += calculateRefraction(objects, hitMesh, ray, interpolatedNormal, hitPoint, hitTri, d, meshes, intersectionTests, d_max, color, lights, cameraDir);
 
 	return color;
 }
