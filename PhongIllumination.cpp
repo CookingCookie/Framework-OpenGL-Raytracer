@@ -11,7 +11,7 @@ PhongIllumination::~PhongIllumination() {
 }
 
 Vec3f PhongIllumination::IlluminationCalculation(SceneObject& sceneObject, vector <light>& lightSources,
-	Vec3f hitPoint, Vec3f N, Vec3f V, vector <unsigned int> S, Vec3f RecursiveRayIntensity, float Reflection) {
+	Vec3f hitPoint, Vec3f N, Vec3f V, vector <unsigned int> S, Vec3f RecursiveRayIntensity, float Reflection, Vec3f transparencyIntensity, float transparency) {
 	unsigned int lss = lightSources.size();
 	Vec3f I_ambient, DS_sumOverLights, L, LV, H;
 	// iterate over r,g,b
@@ -31,6 +31,7 @@ Vec3f PhongIllumination::IlluminationCalculation(SceneObject& sceneObject, vecto
 		}
 
 		DS_sumOverLights[i] += Reflection * RecursiveRayIntensity[i];
+		DS_sumOverLights[i] += transparency * transparencyIntensity[i];
 	}
 	return 	I_ambient + DS_sumOverLights;
 }

@@ -77,7 +77,7 @@ int main(int argc, char** argv) {
 	textureIDs.push_back(loadTexture(image));
 	// add object attributes (material, texture, ...)
 	SceneObject so;
-	//============ added ===============// Ballon
+	//============ added ===============// Ballons
 	so.reflectivity = 0.4f;
 	so.opacity = 0.0f;
 	so.refraction = 0.0f;
@@ -127,8 +127,8 @@ int main(int argc, char** argv) {
 	objects.push_back(so);
 
 	//============ added ===============// Ballon
-	so.reflectivity = 0.5f;
-	so.opacity = 0.0f;
+	so.reflectivity = 0.0f;
+	so.opacity = 0.8f;
 	so.refraction = 0.0f;
 	//==================================// 
 	so.matAmbient[0] = 0.2f; so.matAmbient[1] = 0.8f; so.matAmbient[2] = 0.4f; so.matAmbient[3] = 0.2f;

@@ -84,7 +84,7 @@ Vec3f RecursiveRayTracer::calculateReflection(vector<SceneObject> objects, int h
 		if ((hitMesh2 = intersection.intersectRayObjectsEarliest(reflectiveRay, t2, u2, v2, hitTri2, prev2, t_min2, u_min2, v_min2, meshes, intersectionTests)) != -1) {
 			d++;
 			// calculate reflective ray
-			return lights.size() * objects[hitMesh].reflectivity * calculateColor(color, reflectiveRay, u_min2, v_min2, t_min2, hitTri2, hitMesh2, d_max, d, reflectiveRayIntensity, transparentRayIntensity, meshes, intersectionTests, lights, cameraDir, objects);
+			return objects[hitMesh].reflectivity * calculateColor(color, reflectiveRay, u_min2, v_min2, t_min2, hitTri2, hitMesh2, d_max, d, reflectiveRayIntensity, transparentRayIntensity, meshes, intersectionTests, lights, cameraDir, objects);
 		}
 	}
 
@@ -177,7 +177,7 @@ Vec3f RecursiveRayTracer::calculateTransparency(vector<SceneObject> objects, int
 	// transparency ray
 	if (objects[hitMesh].opacity > 0.0f) {
 		// calculate reflective ray
-		//Vec3f transparentRayDirection = helper.getRefrDir(ray.d, interpolatedNormal, hitMesh);
+		//Vec3f transparentRayDirection = helper.getRefrDir(ray.d, interpolatedNormal, hitMesh);s
 		//Ray <float> transparentRay(&hitPoint[0], &transparentRayDirection[0]);
 		Vec3f ray_d = ray.d;
 		Ray <float> transparentRay(&hitPoint[0], &ray_d[0]);
@@ -216,14 +216,14 @@ Vec3f RecursiveRayTracer::calculateColor(Vec3f color, Ray <float> ray, float u_m
 
 	// calculate reflexion
 	Vec3f  recursiveRayIntensity  = calculateReflection(objects, hitMesh, ray, interpolatedNormal, hitPoint, hitTri, d, meshes, intersectionTests,
+		reflectiveRayIntensity, d_max, transparentRayIntensity, color, lights, cameraDir);	
+
+	// calculate transparency
+	Vec3f  transparencyIntensity = calculateTransparency(objects, hitMesh, ray, interpolatedNormal, hitPoint, hitTri, d, meshes, intersectionTests,
 		reflectiveRayIntensity, d_max, transparentRayIntensity, color, lights, cameraDir);
 
 	// do the phong illumination algorithm
-	color = phong.IlluminationCalculation(objects[hitMesh], lights, hitPoint, interpolatedNormal, V, S, recursiveRayIntensity, objects[hitMesh].reflectivity);
-
-	// calculate transparency
-	//color += calculateTransparency(objects, hitMesh, ray, interpolatedNormal, hitPoint, hitTri, d, meshes, intersectionTests,
-	//	reflectiveRayIntensity, d_max, transparentRayIntensity, color, lights, cameraDir);
+	color = phong.IlluminationCalculation(objects[hitMesh], lights, hitPoint, interpolatedNormal, V, S, recursiveRayIntensity, objects[hitMesh].reflectivity, transparencyIntensity, objects[hitMesh].opacity);
 
 	// calculate refraction
 	//color += calculateRefraction(objects, hitMesh, ray, interpolatedNormal, hitPoint, hitTri, d, meshes, intersectionTests,
