@@ -63,12 +63,12 @@ int main(int argc, char** argv) {
 	meshes.push_back(tm3);
 	TriangleMesh tm4;
 	filename = "Models/ballon.off";
-	tm1.loadOFF(filename.c_str(), Vec3f(1.0f, 0.0f, 1.0f), 20.0f);
-	meshes.push_back(tm1);
+	tm4.loadOFF(filename.c_str(), Vec3f(1.0f, 0.0f, 1.0f), 20.0f);
+	meshes.push_back(tm4);
 	TriangleMesh tm5;
 	filename = "Models/ballon.off";
-	tm1.loadOFF(filename.c_str(), Vec3f(1.0f, 0.0f, 2.0f), 20.0f);
-	meshes.push_back(tm1);
+	tm5.loadOFF(filename.c_str(), Vec3f(1.0f, 0.0f, 2.0f), 20.0f);
+	meshes.push_back(tm5);
 	for (unsigned int i = 0; i < meshes.size(); i++) meshes[i].coutData();
 	// load textures
 	Image* image;
